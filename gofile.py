@@ -16,7 +16,7 @@ def run_flask():
     app.run(host='0.0.0.0', port=5000)
 
 # Discord Botのセットアップ
-TOKEN = os.getenv("DISCORD_TOKENファイル")
+TOKEN = os.getenv("DISCORD_TOKENfile")
 
 # Intentsを有効にする
 intents = discord.Intents.default()
