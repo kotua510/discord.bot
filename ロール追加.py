@@ -1,5 +1,8 @@
+import os
+import threading
 import discord
 from discord.ext import commands
+from flask import Flask
 
 intents = discord.Intents.default()
 intents.guilds = True
@@ -7,6 +10,8 @@ intents.members = True  # メンバーにアクセスするためのインテン
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+
+TOKEN = os.getenv("DISCORD_TOKENlore")
 
 # 色の指定用の辞書（色名と色コードの対応）
 COLOR_CODES = {
@@ -64,5 +69,24 @@ async def assign_roles_error(ctx, error):
   elif isinstance(error, commands.BadArgument):
     await ctx.send("無効な引数です。正しい形式で指定してください。")
 
+# Flaskアプリのセットアップ
+app = Flask(__name__)
 
-bot.run('')
+@app.route('/')
+def home():
+  return "Discord Bot is running!"
+
+def run_flask():
+  app.run(host='0.0.0.0', port=5000)
+
+def run_discord_bot():
+  bot.run(TOKEN)
+
+# FlaskとDiscord Botを同時に実行するためのスレッドを作成
+if __name__ == "__main__":
+  # Flaskを新しいスレッドで起動
+  flask_thread = threading.Thread(target=run_flask)
+  flask_thread.start()
+
+  # Discord Botをメインスレッドで起動
+  run_discord_bot()
