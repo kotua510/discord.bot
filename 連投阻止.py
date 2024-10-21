@@ -3,6 +3,9 @@ from discord.ext import commands
 from collections import defaultdict
 import asyncio
 from datetime import timedelta
+import os
+import threading
+from flask import Flask
 
 intents = discord.Intents.default()
 intents.messages = True  # メッセージイベントを有効化
@@ -10,6 +13,8 @@ intents.guilds = True
 intents.message_content = True  # メッセージ内容を取得
 
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+TOKEN = os.getenv("DISCORD_TOKENcombo")
 
 # ユーザーごとのメッセージ履歴を保持するための辞書
 message_history = defaultdict(list)
@@ -40,6 +45,23 @@ async def on_message(message):
 
   await bot.process_commands(message)
 
+app = Flask(__name__)
 
-# Botの起動
-bot.run('')
+@app.route('/')
+def home():
+  return "Discord Bot is running!"
+
+def run_flask():
+  app.run(host='0.0.0.0', port=5000)
+
+def run_discord_bot():
+  bot.run(TOKEN)
+
+# FlaskとDiscord Botを同時に実行するためのスレッドを作成
+if __name__ == "__main__":
+  # Flaskを新しいスレッドで起動
+  flask_thread = threading.Thread(target=run_flask)
+  flask_thread.start()
+
+  # Discord Botをメインスレッドで起動
+  run_discord_bot()
