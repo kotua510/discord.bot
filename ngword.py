@@ -1,6 +1,9 @@
 import discord
+import os
+import threading
 from discord.ext import commands
 from datetime import timedelta  # これが必要です
+from flask import Flask
 
 
 intents = discord.Intents.default()
@@ -8,6 +11,8 @@ intents.messages = True  # メッセージをキャッチするためのintent
 intents.guilds = True
 intents.members = True  # メンバー情報にアクセスするためのintent
 intents.message_content = True
+
+TOKEN = os.getenv("DISCORD_TOKENng")
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -58,5 +63,24 @@ async def on_message(message):
   # コマンドの処理もon_messageで行いたい場合
   await bot.process_commands(message)
 
-# Botを起動
-bot.run('')
+# Flaskアプリのセットアップ
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+  return "Discord Bot is running!"
+
+def run_flask():
+  app.run(host='0.0.0.0', port=5000)
+
+def run_discord_bot():
+  bot.run(TOKEN)
+
+# FlaskとDiscord Botを同時に実行するためのスレッドを作成
+if __name__ == "__main__":
+  # Flaskを新しいスレッドで起動
+  flask_thread = threading.Thread(target=run_flask)
+  flask_thread.start()
+
+  # Discord Botをメインスレッドで起動
+  run_discord_bot()
