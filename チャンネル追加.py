@@ -1,10 +1,15 @@
+import os
+import threading
 import discord
 from discord.ext import commands
+from flask import Flask
 
 
 intents = discord.Intents.default()
 intents.guilds = True
 intents.message_content = True  # コマンドのメッセージを処理するためのインテント
+
+TOKEN = os.getenv("DISCORD_TOKENchanel")
 
 
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -29,4 +34,24 @@ async def create_channels_error(ctx, error):
   elif isinstance(error, commands.MissingPermissions):
     await ctx.send("チャンネルを作成する権限がありません。")
 
-bot.run('')
+# Flaskアプリのセットアップ
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+  return "Discord Bot is running!"
+
+def run_flask():
+  app.run(host='0.0.0.0', port=5000)
+
+def run_discord_bot():
+  bot.run(TOKEN)
+
+# FlaskとDiscord Botを同時に実行するためのスレッドを作成
+if __name__ == "__main__":
+  # Flaskを新しいスレッドで起動
+  flask_thread = threading.Thread(target=run_flask)
+  flask_thread.start()
+
+  # Discord Botをメインスレッドで起動
+  run_discord_bot()
