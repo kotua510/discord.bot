@@ -20,7 +20,7 @@ async def on_ready():
 async def on_voice_state_update(member, before, after):
   # サーバー内の特定のテキストチャンネルを取得（例: "general"）
   guild = member.guild
-  text_channel = discord.utils.get(guild.text_channels, name="一般")
+  text_channel = discord.utils.get(guild.text_channels, name="通話入出記録くん")
 
   if text_channel is not None:
     if before.channel is None and after.channel is not None:
